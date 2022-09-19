@@ -232,7 +232,7 @@ contains
       speciesPtrs(ii) = c_loc(stringArray(ii))
     end do
 
-    iStatus = model_init(nspecies, speciesPtrs, interactionCutoff, interactionCutoff, cptr_nShells,&
+    iStatus = model_init(nspecies, speciesPtrs, interactionCutoff, environmentCutoff, cptr_nShells,&
         & cptr_shells, cptr_shellOccs, this%modelState, errString)
 
     if (iStatus /= 0) then
@@ -338,7 +338,7 @@ end module dftbp_externalmodel
 
 program main
 
-  use accuracy
+  use dftbp_common_accuracy
   use dftbp_externalmodel
   implicit none
 
