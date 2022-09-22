@@ -10,7 +10,8 @@ end module dftbp_common_accuracy
 !> Connects to an external energy/hamiltonian model or provides a dummy external model if no
 !> external library is linked
 module dftbp_externalmodel
-  use iso_c_binding, only : c_int, c_char, c_bool, c_null_char, c_ptr, c_double, c_loc, c_f_pointer
+  use iso_c_binding, only : c_int, c_char, c_bool, c_null_char, c_ptr, c_double, c_loc,&
+      & c_f_pointer, c_intptr_t
   use dftbp_common_accuracy, only : dp, mc
   implicit none
 
@@ -69,7 +70,7 @@ module dftbp_externalmodel
     real(dp), allocatable :: shellOccs(:,:)
 
     !> C pointer to internal state of the model (assume that model manages this)
-    type(c_ptr) :: modelState
+    integer(c_intptr_t) :: modelState
 
   contains
 
@@ -116,11 +117,12 @@ module dftbp_externalmodel
       type(extModelAbilities), intent(out) :: capabilities
     end subroutine model_provides
 
+
     !> Initialise external model for calculation
     function model_init(nspecies, speciesnames, interactionCutoff, environmentCutoff,&
         & nShellsOnSpecies, shellLValues, shellOccs, modelstate, errString)&
         & bind(C, name='initialise_model_for_dftbp')
-      import :: c_int, c_ptr, c_char, c_double
+      import :: c_int, c_ptr, c_char, c_double, c_intptr_t
       implicit none
       integer(c_int), intent(in) :: nspecies
       type(c_ptr), target, intent(in) :: speciesnames(nspecies)
@@ -129,23 +131,23 @@ module dftbp_externalmodel
       type(c_ptr), target, intent(out) :: nShellsOnSpecies
       type(c_ptr), target, intent(out) :: shellLValues
       type(c_ptr), target, intent(out) :: shellOccs
-      type(c_ptr), target, intent(out) :: modelstate
+      integer(c_intptr_t) :: modelstate
       character(c_char), intent(out) :: errString(*)
       integer(c_int) :: model_init
     end function model_init
 
-    !> Initialise external model for calculation
-    function model_update(modelstate, errString)&
-        & bind(C, name='update_model_for_dftbp')
-      import :: c_int, c_ptr, c_char
+
+    function model_update(modelstate, errString) bind(C, name='update_model_for_dftbp')
+      import :: c_int, c_ptr, c_char, c_intptr_t
       implicit none
       !> Internal state of model, opaque to us
-      type(c_ptr), target, intent(in) :: modelstate
+      integer(c_intptr_t) :: modelstate
       !> Any returned error string
       character(c_char), intent(out) :: errString(*)
       !> Model state after operation
       integer(c_int) :: model_update
     end function model_update
+
 
     !> Clean up memory attached to a C pointer
     subroutine c_free(ptr) bind(c, name="free")
