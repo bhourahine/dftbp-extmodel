@@ -41,7 +41,8 @@ int dftbp_provided_with(typeof (mycapabilities) *capabilities, int* nChars, char
   //sprintf(*modelname, "%s", "Huckel toy model");
 
   int lenName = asprintf(modelname, "%s", "Huckel toy model");
-  if (lenName /= -1) {
+
+  if (lenName != -1) {
     *nChars = lenName;
     return 0;
   } else {
@@ -75,11 +76,11 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
   input = fopen("input.dat", "r");
   if (!input) {
     iErr = asprintf(message, "%s", "Library error opening input file");
-    if (iErr /= -1) {
-      return -iErr;
+    if (iErr != -1) {
+      return 0;
     } else {
       // bring down the code messily
-      exit -1;
+      return -1;
     }
   }
 
@@ -90,20 +91,20 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
                  &internalState->onsites[1], &internalState->onsites[2]);
   if (items == EOF) {
     iErr = asprintf(message, "%s", "Toy library malformed end of data file at first line");
-    if (iErr /= -1) {
-      return -iErr;
+    if (iErr != -1) {
+      return 0;
     } else {
       // bring down the code messily
-      exit -1;
+      return -1;
     }
   }
   if (items != 3) {
     iErr = asprintf(message, "%s %i", "Toy library malformed first line of data file:", items);
-    if (iErr /= -1) {
-      return -iErr;
+    if (iErr != -1) {
+      return 0;
     } else {
       // bring down the code messily
-      exit -1;
+      return -1;
     }
   }
   items = fscanf(input, "%lf %lf %lf %lf %lf %lf", &internalState->hopping[0],
@@ -114,39 +115,39 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
                  &internalState->hopping[5]);
   if (items == EOF) {
     iErr = asprintf(message,"%s", "Toy library malformed end of data file before 2nd line");
-    if (iErr /= -1) {
-      return -iErr;
+    if (iErr != -1) {
+      return 0;
     } else {
       // bring down the code messily
-      exit -1;
+      return -1;
     }
   }
   if (items != 6) {
     iErr = asprintf(message, "%s", "Toy library malformed second line of data file");
-    if (iErr /= -1) {
-      return -iErr;
+    if (iErr != -1) {
+      return 0;
     } else {
       // bring down the code messily
-      exit -1;
+      return -1;
     }
   }
   items = fscanf(input, "%lf", interactionCutoff);
   if (items == EOF) {
     iErr = asprintf(message, "%s", "Toy library malformed end of data file before 3rd line (bond cut-off)\n");
-    if (iErr /= -1) {
-      return -iErr;
+    if (iErr != -1) {
+      return 0;
     } else {
       // bring down the code messily
-      exit -1;
+      return -1;
     }
   }
   if (items != 1) {
     iErr = asprintf(message, "%s", "Toy library malformed third line of data file\n");
-    if (iErr /= -1) {
-      return -iErr;
+    if (iErr != -1) {
+      return 0;
     } else {
       // bring down the code messily
-      exit -1;
+      return -1;
     }
   }
 
@@ -157,11 +158,11 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
       {
 	iErr = asprintf(message, "%s %s", "Toy library only knows about C and H atoms, not",
                         speciesName[ii]);
-        if (iErr /= -1) {
-          return -iErr;
+        if (iErr != -1) {
+          return 0;
         } else {
           // bring down the code messily
-          exit -1;
+          return -1;
         }
       }
     if (strcmp(speciesName[ii], "H") == 0) {
@@ -255,11 +256,11 @@ int update_model_for_dftbp(intptr_t *state, int* species, int* nAtomicClusters,
 
   if (!(*internalState).initialised) {
     iErr = asprintf(message, "%s", "Model is not properly initialised");
-    if (iErr /= -1) {
-      return -iErr;
+    if (iErr != -1) {
+      return 0;
     } else {
       // bring down the code messily
-      exit -1;
+      return -1;
     }
   }
 
@@ -416,7 +417,7 @@ int predict_model_for_dftbp(intptr_t *state, double *h0, double *over,
       // Hetero-nuclear bond
 
       if (iParam == 0) {
-        // H-C bond, as iParam /= 0
+        // H-C bond, as iParam != 0
 	h0[(*internalState).bondClusterIndex[iClust]] =
 	  (*internalState).hopping[1];
 	h0[(*internalState).bondClusterIndex[iClust]+1] =
