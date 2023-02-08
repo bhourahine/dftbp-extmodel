@@ -15,7 +15,8 @@ See the LICENSE file for terms of usage and distribution.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../include/externalmodel.h"
+#include "../include/asprintf.h" // As this function isn't cross platform available
+#include "../include/externalmodel.h" // Structures for DFTB+ communication
 
 // Project version
 void dftbp_model_apbi(int* major, int* minor, int* patch)
@@ -27,12 +28,8 @@ void dftbp_model_apbi(int* major, int* minor, int* patch)
 
 
 // Declare capabilities of this model to DFTB+
-void dftbp_provided_with(char* modelname,
-                         typeof (mycapabilities) *capabilities)
+int dftbp_provided_with(typeof (mycapabilities) *capabilities, int* nChars, char** modelname)
 {
-
-  // Name of external model
-  sprintf(modelname, "Huckel toy model");
 
   // flags for capabilities of this specific model
   *capabilities = (mycapabilities) {
@@ -40,7 +37,19 @@ void dftbp_provided_with(char* modelname,
     .derivativeOrder = 0, .selfconsistent = false, .spinchannels = 0
   };
 
-  return;
+  //*modelname = malloc(17 * sizeof(char));
+  //sprintf(*modelname, "%s", "Huckel toy model");
+
+  int lenName = asprintf(modelname, "%s", "Huckel toy model");
+  if (lenName /= -1) {
+    *nChars = lenName;
+    return 0;
+  } else {
+    *nChars = 0;
+    // bring down the code messily
+    return -1;
+  }
+
 }
 
 
@@ -50,24 +59,28 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
                                double* environmentCutoff,
                                int** nShellsOnSpecies,
                                int** shellLValues, double** shellOccs,
-                               intptr_t *state, char* message)
+                               intptr_t *state, char** message)
 {
 
   // Allocate structure for internal state, and generate am intptr for
   // return to DFTB+
-  struct mystate* internalState = (struct mystate*)
-    malloc(sizeof(struct mystate));
+  struct mystate* internalState = (struct mystate*) malloc(sizeof(struct mystate));
   *state = (intptr_t) internalState;
 
   FILE *input;
-  int ii, items;
+  int ii, items, iErr;
 
   // Open input file for some constants for this model, assuming it's
   // in the runtime directory
   input = fopen("input.dat", "r");
   if (!input) {
-    sprintf(message, "Library error opening input file.\n");
-    return -1;
+    iErr = asprintf(message, "%s", "Library error opening input file");
+    if (iErr /= -1) {
+      return -iErr;
+    } else {
+      // bring down the code messily
+      exit -1;
+    }
   }
 
   // read ancillary input file for model parameters and then store
@@ -76,36 +89,65 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
   items = fscanf(input, "%lf %lf %lf", &internalState->onsites[0],
                  &internalState->onsites[1], &internalState->onsites[2]);
   if (items == EOF) {
-    sprintf(message, "Toy library malformed end of data file at first line\n");
-    return -3;
+    iErr = asprintf(message, "%s", "Toy library malformed end of data file at first line");
+    if (iErr /= -1) {
+      return -iErr;
+    } else {
+      // bring down the code messily
+      exit -1;
+    }
   }
   if (items != 3) {
-    sprintf(message, "Toy library malformed first line of data file: %i\n",
-            items);
-    return -3;
+    iErr = asprintf(message, "%s %i", "Toy library malformed first line of data file:", items);
+    if (iErr /= -1) {
+      return -iErr;
+    } else {
+      // bring down the code messily
+      exit -1;
+    }
   }
   items = fscanf(input, "%lf %lf %lf %lf %lf %lf", &internalState->hopping[0],
-                 &internalState->hopping[1], &internalState->hopping[2],
-		 &internalState->hopping[3], &internalState->hopping[4],
-		 &internalState->hopping[5]);
+                 &internalState->hopping[1],
+                 &internalState->hopping[2],
+                 &internalState->hopping[3],
+                 &internalState->hopping[4],
+                 &internalState->hopping[5]);
   if (items == EOF) {
-    sprintf(message, "Toy library malformed end of data file before 2nd line"
-            " (hopping integrals)\n");
-    return -3;
+    iErr = asprintf(message,"%s", "Toy library malformed end of data file before 2nd line");
+    if (iErr /= -1) {
+      return -iErr;
+    } else {
+      // bring down the code messily
+      exit -1;
+    }
   }
   if (items != 6) {
-    sprintf(message, "Toy library malformed second line of data file\n");
-    return -3;
+    iErr = asprintf(message, "%s", "Toy library malformed second line of data file");
+    if (iErr /= -1) {
+      return -iErr;
+    } else {
+      // bring down the code messily
+      exit -1;
+    }
   }
   items = fscanf(input, "%lf", interactionCutoff);
   if (items == EOF) {
-    sprintf(message, "Toy library malformed end of data file before 3rd line"
-            " (bond cut-off)\n");
-    return -3;
+    iErr = asprintf(message, "%s", "Toy library malformed end of data file before 3rd line (bond cut-off)\n");
+    if (iErr /= -1) {
+      return -iErr;
+    } else {
+      // bring down the code messily
+      exit -1;
+    }
   }
   if (items != 1) {
-    sprintf(message, "Toy library malformed third line of data file\n");
-    return -3;
+    iErr = asprintf(message, "%s", "Toy library malformed third line of data file\n");
+    if (iErr /= -1) {
+      return -iErr;
+    } else {
+      // bring down the code messily
+      exit -1;
+    }
   }
 
   for (ii = 0; ii < *nspecies; ii++) {
@@ -113,10 +155,14 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
     // error otherwise
     if (strcmp(speciesName[ii], "C") != 0 && strcmp(speciesName[ii], "H") != 0)
       {
-        sprintf(message,
-                "Toy library only knows about C and H atoms, not %s.\n",
-                speciesName[ii]);
-        return -2;
+	iErr = asprintf(message, "%s %s", "Toy library only knows about C and H atoms, not",
+                        speciesName[ii]);
+        if (iErr /= -1) {
+          return -iErr;
+        } else {
+          // bring down the code messily
+          exit -1;
+        }
       }
     if (strcmp(speciesName[ii], "H") == 0) {
       (*internalState).species2params[ii] = 0;
@@ -188,7 +234,6 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
   (*internalState).bondClusterIndex = NULL;
 
   // blank return message if nothing happening
-  sprintf(message, "\n");
   return 0;
 
 }
@@ -200,17 +245,23 @@ int update_model_for_dftbp(intptr_t *state, int* species, int* nAtomicClusters,
                            int* atomicGlobalAtNos, int* nBndClusters,
                            int* indexBndClusters, double* bndClusters,
                            int* bndGlobalAtNos, int* atomClusterIndex,
-                           int* bondClusterIndex, char* message)
+                           int* bondClusterIndex, char** message)
 {
 
   // map pointer back to structure
   struct mystate* internalState = (struct mystate*) *state;
 
-  if (!(*internalState).initialised) {
-    sprintf(message, "Model is not properly initialised");
-    return -1;
-  }
+  int iErr;
 
+  if (!(*internalState).initialised) {
+    iErr = asprintf(message, "%s", "Model is not properly initialised");
+    if (iErr /= -1) {
+      return -iErr;
+    } else {
+      // bring down the code messily
+      exit -1;
+    }
+  }
 
   internalState->globalSpeciesOfAtoms = species;
 
@@ -236,7 +287,6 @@ int update_model_for_dftbp(intptr_t *state, int* species, int* nAtomicClusters,
   */
 
   // blank return message if nothing happening
-  sprintf(message, "\n");
   return 0;
 
 }
@@ -244,7 +294,7 @@ int update_model_for_dftbp(intptr_t *state, int* species, int* nAtomicClusters,
 
 // Make and then get model predictions back to DFTB+
 int predict_model_for_dftbp(intptr_t *state, double *h0, double *over,
-                            char* message)
+                            char** message)
 {
 
   struct mystate* internalState = (struct mystate*) *state;
@@ -393,7 +443,6 @@ int predict_model_for_dftbp(intptr_t *state, double *h0, double *over,
   }
 
   // blank return message if nothing failing
-  sprintf(message, "\n");
   return 0;
 
 }

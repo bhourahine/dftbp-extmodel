@@ -111,11 +111,11 @@ struct mystate {
      Declare capabilities of this model to DFTB+ via the external model API.
 
      @param modelname null terminated string for name of this model
+     @param nChars characters in model name
      @param capabilities structure with capabilities of the model
 
   */
-  void dftbp_provided_with(char* modelname,
-			   typeof (mycapabilities) *capabilities);
+  int dftbp_provided_with(typeof (mycapabilities) *capabilities, int* nChars, char** modelname);
 
   /**
      Set up this model, read some settings from DFTB+ over it's
@@ -161,7 +161,7 @@ struct mystate {
 				 double* environmentCutoff,
 				 int* nShellsOnSpecies[], int** shells,
                                  double** shellOccs, intptr_t *state,
-				 char* message);
+				 char** message);
 
 
     /**
@@ -214,7 +214,7 @@ struct mystate {
                              int* nBndClusters, int* indexBndClusters,
 			     double* bndClusters, int* bndGlobalAtNos,
 			     int* atomClusterIndex, int* bondClusterIndex,
-                             char* message);
+                             char** message);
 
 
   /**
@@ -237,7 +237,7 @@ struct mystate {
 
   */
   int predict_model_for_dftbp(intptr_t *state, double *h0, double *over,
-                              char* message);
+                              char** message);
 
 
   /**
