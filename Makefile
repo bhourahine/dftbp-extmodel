@@ -1,7 +1,7 @@
 SRC = $(wildcard src/*.c)
 OBJ = $(SRC:.c=.o)
 
-LIB = libfoo.a
+LIB = libexternalmodel.a
 
 $(LIB): $(OBJ)
 	$(AR) rcs $@ $^

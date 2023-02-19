@@ -23,11 +23,11 @@ extern "C" {
     bool hamiltonian;
 
     /** Can this library deliver an overlap matrix (i.e. is a
-	non-orthogonal model)? */
+        non-orthogonal model)? */
     bool overlap;
 
     /** Does this library deliver energy terms (other than the
-	band-structure energy)? */
+        band-structure energy)? */
     bool energy;
 
     /** Order of derivatives returned by the model */
@@ -37,7 +37,7 @@ extern "C" {
     bool selfconsistent;
 
     /** Number of spin channels supported by model (none:0,
-	collinear:1, non-collinear:3) */
+        collinear:1, non-collinear:3) */
     int spinchannels;
 
   } mycapabilities;
@@ -87,7 +87,7 @@ struct mystate {
   // internal model parameters
   double onsites[3]; // Hs, Cs and Cs* alpha
   double hopping[6]; // Hs-Hs, Hs-Cs, Hs-Cs*, Cs-Cs, Cs-Cs*, Cs*-Cs*
-		     // beta values
+                     // beta values
   // index from order of chemical species in DFTB+ to this code's
   // parameter ordering:
   int species2params[2];
@@ -110,9 +110,11 @@ struct mystate {
   /**
      Declare capabilities of this model to DFTB+ via the external model API.
 
-     @param modelname null terminated string for name of this model
-     @param nChars characters in model name
      @param capabilities structure with capabilities of the model
+
+     @param nChars characters in model name
+
+     @param modelname null terminated string for name of this model
 
   */
   int dftbp_provided_with(typeof (mycapabilities) *capabilities, int* nChars, char** modelname);
@@ -149,19 +151,20 @@ struct mystate {
      @param state internal state and data of the model, not checked by
      DFTB+, just passed around
 
-     @param message return message, in event of routine failure
-     (return != 0)
+     @param nChars characters in message
+
+     @param message return as null terminated string, if nChars > 0
 
      @return 0 on successful return, non-zero if there is an error
      message to check
 
    */
   int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
-				 double* interactionCutoff,
-				 double* environmentCutoff,
-				 int* nShellsOnSpecies[], int** shells,
+                                 double* interactionCutoff,
+                                 double* environmentCutoff,
+                                 int* nShellsOnSpecies[], int** shells,
                                  double** shellOccs, intptr_t *state,
-				 char** message);
+                                 int* nChars, char** message);
 
 
     /**
@@ -169,7 +172,7 @@ struct mystate {
      DFTB+ over it's external model API.
 
      @param state internal state and data of the model, this is not
-     checke by DFTB+, just passed around by it
+     checked by DFTB+, just passed around by it
 
      @param species Species index for atoms in the global structure
 
@@ -201,50 +204,54 @@ struct mystate {
      @param bondClusterIndex Indexing for where to find diatomic
      (bond) elements in hamiltonian/overlap matrices
 
-     @param message return message, in event of routine failure
-     (return != 0)
+     @param nChars characters in the message, with a following null
+     terminating character
 
-     @return 0 on successful return, non-zero if there is an error
-     message to check
+     @param message return as null terminated string, if nChars > 0
+
+     @return 0 on successful return, < 0 if there is an error and > 0
+      if non-error message to check
 
    */
   int update_model_for_dftbp(intptr_t *state, int* species,
                              int* nAtomicClusters, int* indexAtomicClusters,
                              double* atomicClusters, int* atomicGlobalAtNos,
                              int* nBndClusters, int* indexBndClusters,
-			     double* bndClusters, int* bndGlobalAtNos,
-			     int* atomClusterIndex, int* bondClusterIndex,
-                             char** message);
+                             double* bndClusters, int* bndGlobalAtNos,
+                             int* atomClusterIndex, int* bondClusterIndex,
+                             int* nChars, char** message);
 
 
   /**
-      Get model predictions
+     Get model predictions
 
-      @param state internal state and data of the model, this is not
-      checke by DFTB+, just passed around by it
+     @param state internal state and data of the model, this is not
+     checked by DFTB+, just passed around by it
 
-      @param h0 hamiltonian
+     @param h0 hamiltonian
 
-      @param over overlap matrix
+     @param over overlap matrix
 
-      @param h0Index hamiltonian index for blocks of matrix elements
+     @param h0Index hamiltonian index for blocks of matrix elements
 
-      @param message return message, in event of routine failure
-      (return != 0)
+     @param nChars characters in the message, with a following null
+     terminating character
 
-      @return 0 on successful return, non-zero if there is an error
-      message to check
+     @param message return as null terminated string, if nChars > 0
+
+     @return 0 on successful return, < 0 if there is an error and > 0
+     if non-error message to check
 
   */
   int predict_model_for_dftbp(intptr_t *state, double *h0, double *over,
-                              char** message);
+                              int* nChars, char** message);
 
 
   /**
      Clean up after this model, freeing any memory in the mystate type
 
      @param state internal state and data of the model. This is not
-     checke by DFTB+, just passed around by it, so we need to remove
+     checked by DFTB+, just passed around by it, so we need to remove
      any allocated memory here.
 
      @param message return message, in event of routine failure
@@ -254,7 +261,7 @@ struct mystate {
      message to check
 
   */
-  void cleanup_model_for_dftbp(intptr_t *state);
+  int cleanup_model_for_dftbp(intptr_t *state, int* nChars, char** message);
   
 #ifdef __cplusplus
 }

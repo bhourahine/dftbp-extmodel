@@ -2,7 +2,7 @@
 
 @brief
 Example external model for the DFTB+ project: www.dftbplus.org
-Copyright (C) 2022 B. Hourahine
+Copyright (C) 2022 - 2023 B. Hourahine
 
 See the LICENSE file for terms of usage and distribution.
 
@@ -37,14 +37,11 @@ int dftbp_provided_with(typeof (mycapabilities) *capabilities, int* nChars, char
     .derivativeOrder = 0, .selfconsistent = false, .spinchannels = 0
   };
 
-  //*modelname = malloc(17 * sizeof(char));
-  //sprintf(*modelname, "%s", "Huckel toy model");
-
   int lenName = asprintf(modelname, "%s", "Huckel toy model");
 
   if (lenName != -1) {
     *nChars = lenName;
-    return 0;
+    return 1;
   } else {
     *nChars = 0;
     // bring down the code messily
@@ -56,11 +53,9 @@ int dftbp_provided_with(typeof (mycapabilities) *capabilities, int* nChars, char
 
 // Initialise this model, reading some settings from DFTB+
 int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
-                               double* interactionCutoff,
-                               double* environmentCutoff,
-                               int** nShellsOnSpecies,
-                               int** shellLValues, double** shellOccs,
-                               intptr_t *state, char** message)
+                               double* interactionCutoff, double* environmentCutoff,
+                               int** nShellsOnSpecies, int** shellLValues, double** shellOccs,
+                               intptr_t *state, int* nChars, char** message)
 {
 
   // Allocate structure for internal state, and generate am intptr for
@@ -69,19 +64,20 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
   *state = (intptr_t) internalState;
 
   FILE *input;
-  int ii, items, iErr;
+  int ii, items, iStat;
 
   // Open input file for some constants for this model, assuming it's
   // in the runtime directory
   input = fopen("input.dat", "r");
   if (!input) {
-    iErr = asprintf(message, "%s", "Library error opening input file");
-    if (iErr != -1) {
-      return 0;
+    iStat = asprintf(message, "%s", "Library error opening input file");
+    if (iStat != -1) {
+      *nChars = iStat;
     } else {
-      // bring down the code messily
-      return -1;
+      *nChars = 0;
     }
+    // bring down the code messily
+    return -1;
   }
 
   // read ancillary input file for model parameters and then store
@@ -90,22 +86,24 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
   items = fscanf(input, "%lf %lf %lf", &internalState->onsites[0],
                  &internalState->onsites[1], &internalState->onsites[2]);
   if (items == EOF) {
-    iErr = asprintf(message, "%s", "Toy library malformed end of data file at first line");
-    if (iErr != -1) {
-      return 0;
+    iStat = asprintf(message, "%s", "Toy library malformed end of data file at first line");
+    if (iStat != -1) {
+      *nChars = iStat;
     } else {
-      // bring down the code messily
-      return -1;
+      *nChars = 0;
     }
+    // bring down the code messily
+    return -1;
   }
   if (items != 3) {
-    iErr = asprintf(message, "%s %i", "Toy library malformed first line of data file:", items);
-    if (iErr != -1) {
-      return 0;
+    iStat = asprintf(message, "%s %i", "Toy library malformed first line of data file:", items);
+    if (iStat != -1) {
+      *nChars = iStat;
     } else {
-      // bring down the code messily
-      return -1;
+      *nChars = 0;
     }
+    // bring down the code messily
+    return -1;
   }
   items = fscanf(input, "%lf %lf %lf %lf %lf %lf", &internalState->hopping[0],
                  &internalState->hopping[1],
@@ -114,41 +112,45 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
                  &internalState->hopping[4],
                  &internalState->hopping[5]);
   if (items == EOF) {
-    iErr = asprintf(message,"%s", "Toy library malformed end of data file before 2nd line");
-    if (iErr != -1) {
-      return 0;
+    iStat = asprintf(message,"%s", "Toy library malformed end of data file before 2nd line");
+    if (iStat != -1) {
+      *nChars = iStat;
     } else {
-      // bring down the code messily
-      return -1;
+      *nChars = 0;
     }
+    // bring down the code messily
+    return -1;
   }
   if (items != 6) {
-    iErr = asprintf(message, "%s", "Toy library malformed second line of data file");
-    if (iErr != -1) {
-      return 0;
+    iStat = asprintf(message, "%s", "Toy library malformed second line of data file");
+    if (iStat != -1) {
+      *nChars = iStat;
     } else {
-      // bring down the code messily
-      return -1;
+      *nChars = 0;
     }
+    // bring down the code messily
+    return -1;
   }
   items = fscanf(input, "%lf", interactionCutoff);
   if (items == EOF) {
-    iErr = asprintf(message, "%s", "Toy library malformed end of data file before 3rd line (bond cut-off)\n");
-    if (iErr != -1) {
-      return 0;
+    iStat = asprintf(message, "%s", "Toy library malformed end of data file before 3rd line (bond cut-off)\n");
+    if (iStat != -1) {
+      *nChars = iStat;
     } else {
-      // bring down the code messily
-      return -1;
+      *nChars = 0;
     }
+    // bring down the code messily
+    return -1;
   }
   if (items != 1) {
-    iErr = asprintf(message, "%s", "Toy library malformed third line of data file\n");
-    if (iErr != -1) {
-      return 0;
+    iStat = asprintf(message, "%s", "Toy library malformed third line of data file\n");
+    if (iStat != -1) {
+      *nChars = iStat;
     } else {
-      // bring down the code messily
-      return -1;
+      *nChars = 0;
     }
+    // bring down the code messily
+    return -1;
   }
 
   for (ii = 0; ii < *nspecies; ii++) {
@@ -156,14 +158,15 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
     // error otherwise
     if (strcmp(speciesName[ii], "C") != 0 && strcmp(speciesName[ii], "H") != 0)
       {
-	iErr = asprintf(message, "%s %s", "Toy library only knows about C and H atoms, not",
+	iStat = asprintf(message, "%s %s", "Toy library only knows about C and H atoms, not",
                         speciesName[ii]);
-        if (iErr != -1) {
-          return 0;
+        if (iStat != -1) {
+          *nChars = iStat;
         } else {
-          // bring down the code messily
-          return -1;
+          *nChars = 0;
         }
+        // bring down the code messily
+        return -1;
       }
     if (strcmp(speciesName[ii], "H") == 0) {
       (*internalState).species2params[ii] = 0;
@@ -218,11 +221,6 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
 
   (*internalState).initialised = true;
 
-  printf(" Initial on-site energies : H %f, C %f %f\n",
-         (*internalState).onsites[0], (*internalState).onsites[1],
-         (*internalState).onsites[2]);
-
-
   (*internalState).nAtomicClusters = 0;
   (*internalState).indexAtomicClusters = NULL;
   (*internalState).atomicClusters = NULL;
@@ -234,8 +232,18 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
   (*internalState).bndGlobalAtNos = NULL;
   (*internalState).bondClusterIndex = NULL;
 
-  // blank return message if nothing happening
-  return 0;
+  iStat = asprintf(message,"Model initialised, on-site energies : H %f, C %f %f\n",
+                  (*internalState).onsites[0], (*internalState).onsites[1],
+                  (*internalState).onsites[2]);
+  if (iStat != -1) {
+    *nChars = iStat;
+    // return that there is a message
+    return 1;
+  } else {
+    *nChars = 0;
+    // bring down the code messily
+    return -1;
+  }
 
 }
 
@@ -246,7 +254,7 @@ int update_model_for_dftbp(intptr_t *state, int* species, int* nAtomicClusters,
                            int* atomicGlobalAtNos, int* nBndClusters,
                            int* indexBndClusters, double* bndClusters,
                            int* bndGlobalAtNos, int* atomClusterIndex,
-                           int* bondClusterIndex, char** message)
+                           int* bondClusterIndex, int* nChars, char** message)
 {
 
   // map pointer back to structure
@@ -255,10 +263,12 @@ int update_model_for_dftbp(intptr_t *state, int* species, int* nAtomicClusters,
   int iErr;
 
   if (!(*internalState).initialised) {
-    iErr = asprintf(message, "%s", "Model is not properly initialised");
+    iErr = asprintf(message, "%s", "External model is not properly initialised");
     if (iErr != -1) {
-      return 0;
+      *nChars = iErr;
+      return -1;
     } else {
+      *nChars = 0;
       // bring down the code messily
       return -1;
     }
@@ -288,6 +298,9 @@ int update_model_for_dftbp(intptr_t *state, int* species, int* nAtomicClusters,
   */
 
   // blank return message if nothing happening
+  *nChars = 0;
+
+  // All OK
   return 0;
 
 }
@@ -295,10 +308,24 @@ int update_model_for_dftbp(intptr_t *state, int* species, int* nAtomicClusters,
 
 // Make and then get model predictions back to DFTB+
 int predict_model_for_dftbp(intptr_t *state, double *h0, double *over,
-                            char** message)
+                            int* nChars, char** message)
 {
 
   struct mystate* internalState = (struct mystate*) *state;
+
+  int iErr;
+
+  if (!(*internalState).initialised) {
+    iErr = asprintf(message, "%s", "External model is not properly initialised");
+    if (iErr != -1) {
+      *nChars = iErr;
+      return -1;
+    } else {
+      *nChars = 0;
+      // bring down the code messily
+      return -1;
+    }
+  }
 
   // For this specific model, overlap is ignored, but would be indexed
   // in the same way as the hamiltonian
@@ -444,21 +471,33 @@ int predict_model_for_dftbp(intptr_t *state, double *h0, double *over,
   }
 
   // blank return message if nothing failing
+  *nChars = 0;
+
+  // Everything OK:
   return 0;
 
 }
 
 
 // Clean up after this model, freeing any memory in the mystate type
-void cleanup_model_for_dftbp(intptr_t *state) {
+int cleanup_model_for_dftbp(intptr_t *state, int* nChars, char** message) {
 
   // DFTB+ only sees integer pointer "state", so need original
   // structure to clean up
   struct mystate* internalState = (struct mystate*) *state;
 
-  printf("Cleaning up\n");
-
   free(internalState);
   *state = (intptr_t) internalState;
+
+  int iStat = asprintf(message,"%s", "Cleaned up model");
+  if (iStat != -1) {
+    *nChars = iStat;
+    // return that there is a message to check
+    return 1;
+  } else {
+    *nChars = 0;
+    // bring down the code messily
+    return -1;
+  }
 
 }
