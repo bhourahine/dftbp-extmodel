@@ -15,7 +15,10 @@ See the LICENSE file for terms of usage and distribution.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if __APPLE__
+#else
 #include "../include/asprintf.h" // As this function isn't cross platform available
+#endif
 #include "../include/externalmodel.h" // Structures for DFTB+ communication
 
 // Project version
