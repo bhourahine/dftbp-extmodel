@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(externaldftbpmodel VERSION 0.0.1 DESCRIPTION "Toy external model for the DFTB+ code")
+project(ExternalModel VERSION 0.0.1 DESCRIPTION "Toy external model for the DFTB+ code")
 
 set(sources src/externalmodel.c)
 
