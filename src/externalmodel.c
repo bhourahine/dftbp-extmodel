@@ -156,7 +156,7 @@ int initialise_model_for_dftbp(int* nspecies, char* speciesName[],
 
   // each atom is neutral when it's single shell containing only one
   // electron:
-  *shellOccs =  calloc(*nspecies * maxShells, sizeof(double));
+  *shellOccs = calloc(*nspecies * maxShells, sizeof(double));
   for (ii=0; ii<*nspecies; ii++) {
     int jj = ii * maxShells;
     if ((*internalState).species2params[ii] == 0)

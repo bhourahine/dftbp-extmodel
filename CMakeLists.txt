@@ -3,15 +3,17 @@ project(ExternalModel VERSION 0.0.1 DESCRIPTION "Toy external model for the DFTB
 
 set(sources src/externalmodel.c)
 
-add_library(externalmodel_objlib OBJECT ${sources})
+add_library(ExternalModel ${sources})
 
 set(includedir ${CMAKE_CURRENT_BINARY_DIR}/include)
 
-set_target_properties(externalmodel_objlib PROPERTIES
+set_target_properties(ExternalModel PROPERTIES
   VERSION ${PROJECT_VERSION}
   SOVERSION 1
   PUBLIC_HEADER include/externalmodel.h)
 
-set_target_properties(externalmodel_objlib PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
+set_target_properties(ExternalModel PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
 
-target_include_directories(externalmodel_objlib PUBLIC ${includedir})
+#target_include_directories(ExternalModel PUBLIC ${includedir})
+
+option(BUILD_SHARED_LIBS "Build shared rather than static library" ON)
