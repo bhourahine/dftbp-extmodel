@@ -5,6 +5,9 @@ set(sources src/externalmodel.c)
 
 add_library(ExternalModel ${sources})
 
+install(TARGETS ExternalModel
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+
 set(includedir ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 set_target_properties(ExternalModel PROPERTIES
